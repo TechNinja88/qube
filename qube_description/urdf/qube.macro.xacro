@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- Define properties for dimensions -->
-  <xacro:property name="stator_size" value="0.102" />  <!-- Maintain cube form -->
-  <xacro:property name="rotor_height" value="0.008" /> <!-- Thinner disk -->
-  <xacro:property name="rotor_radius" value="0.020" /> <!-- Smaller radius -->
+  
+  <xacro:property name="stator_size" value="0.102" />  
+  <xacro:property name="rotor_height" value="0.008" /> 
+  <xacro:property name="rotor_radius" value="0.020" /> 
   <xacro:property name="angle_length" value="0.020" />
   <xacro:property name="angle_width" value="0.002" />
   <xacro:property name="angle_height" value="0.002" />
@@ -91,7 +92,7 @@
       <axis xyz="0 0 1"/>  <!-- Rotate around Z axis -->
     </joint>
 
-    <!-- Fixed joint connecting rotor_link to indicator_link -->
+    <!-- joint connecting rotor_link to indicator_link -->
     <joint name="${prefix}indicator_joint" type="fixed">
       <parent link="${prefix}rotary_link"/>
       <child link="${prefix}indicator_link"/>

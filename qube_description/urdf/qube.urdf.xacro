@@ -2,10 +2,8 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="qube">
     <!-- Include the Qube macro -->
     <xacro:include filename="$(find qube_description)/urdf/qube.macro.xacro" />
-    
-    <!-- Define world link -->
     <link name="world">
-        <!-- This is an empty link that serves as the root of the robot -->
+        <!-- link that serves as the root of the robot -->
     </link>
     
     <!-- Call the Qube macro -->
