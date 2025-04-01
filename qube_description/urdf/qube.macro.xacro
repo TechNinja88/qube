@@ -10,7 +10,7 @@
   <xacro:property name="angle_height" value="0.002" />
 
   <!-- Define the qube model macro -->
-  <xacro:macro name="qube" params="prefix:=''">
+  <xacro:macro name="qube" params="prefix">
     <!-- Base link - no geometry -->
     <link name="${prefix}base_link"/>
 
@@ -85,7 +85,7 @@
     </joint>
 
     <!-- Revolute joint connecting stator_link to rotor_link -->
-    <joint name="${prefix}rotary_joint" type="continuous">
+    <joint name="${prefix}motor_joint" type="continuous">
       <parent link="${prefix}stator_link"/>
       <child link="${prefix}rotary_link"/>
       <origin xyz="0 0 ${stator_size/2 + rotor_height/2}" rpy="0 0 0"/>

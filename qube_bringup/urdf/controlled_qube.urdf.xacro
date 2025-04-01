@@ -1,23 +1,20 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="controlled_qube">
-
-  <!-- Makroargumenter -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="controlled_qube">
+  <!-- Define arguments -->
   <xacro:arg name="baud_rate" default="115200"/>
-  <xacro:arg name="device" default="/dev/ttyUSB0"/>
+  <xacro:arg name="device" default="/dev/ttyACM0"/>
   <xacro:arg name="simulation" default="false"/>
-
-  <!-- Inkluder original Qube URDF -->
-  <xacro:include filename="$(find qube_description)/urdf/qube.urdf.xacro" />
-  <xacro:qube/>
-
-  <!-- Inkluder ROS2 Control -->
-  <xacro:include filename="$(find qube_driver)/ros2_control/qube_driver.ros2_control.xacro" />
-
-  <xacro:qube_driver_ros2_control 
-      name="qube_driver"
-      prefix=""
-      baud_rate="$(arg baud_rate)"
-      device="$(arg device)"
-      simulation="$(arg simulation)" />
+    <!-- Include the Qube macro -->
+    <xacro:include filename="$(find qube_description)/urdf/qube.urdf.xacro" />
+    
+    <!-- Include the ros2_control macro -->
+    <xacro:include filename="$(find qube_driver)/ros2_control/qube_driver.ros2_control.xacro" />
+    
+    <!-- Add ros2_control to the robot -->
+    <xacro:qube_driver_ros2_control 
+        name="qube_driver" 
+        prefix="" 
+        baud_rate="$(arg baud_rate)" 
+        device="$(arg device)"
+        simulation="$(arg simulation)" />
 </robot>
-
