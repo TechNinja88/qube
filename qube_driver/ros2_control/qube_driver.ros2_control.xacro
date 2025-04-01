@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- This macro generates a ROS2 interface to a Quanser Qube -->
+    <xacro:macro name="qube_driver_ros2_control" params="name prefix baud_rate device simulation">
+        <ros2_control name="${name}" type="system">
+        <xacro:if value="${simulation}"> <!-- create a fake hardware if it is a simulation -->
+            <hardware>
+                <plugin>mock_components/GenericSystem</plugin>
+                <param name="calculate_dynamics">true</param>
+                <param name="custom_interface_with_following_offset">0</param>
+                <param name="disable_commands">false</param>
+                <param name="mock_gpio_commands">false</param>
+                <param name="mock_sensor_commands">false</param>
+                <param name="position_state_following_offset">0.0</param>
+            </hardware>
+        </xacro:if>
+        <xacro:unless value="${simulation}"> <!-- create a real hardware if it is not a simulation -->
+            <hardware>
+                <plugin>qube_driver/ArduinoHardware</plugin>
+                <param name="motor_name">motor_joint</param>
+                <param name="device">${device}</param> <!-- name of the USB device -->
+                <param name="baud_rate">${baud_rate}</param> <!-- baud rate of the Arduino -->
+                <param name="timeout_ms">1000</param>
+            </hardware>
+        </xacro:unless>
+            <joint name="${prefix}motor_joint"> <!-- define joint interfaces -->
+                <command_interface name="velocity" />
+                <state_interface name="position" >
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity" >
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+</robot>

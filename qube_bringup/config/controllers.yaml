@@ -1,0 +1,18 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+    
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    
+    velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+joint_state_broadcaster:
+  ros__parameters: {}
+
+velocity_controller:
+  ros__parameters:
+    joints:
+      - motor_joint  # This matches the joint name in your URDF
+    command_interface: velocity
