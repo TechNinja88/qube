@@ -1,5 +1,6 @@
 controller_manager:
   ros__parameters:
+
     update_rate: 50  # Hz
 
     joint_state_broadcaster:
@@ -10,5 +11,6 @@ controller_manager:
 
 velocity_controller:
   ros__parameters:
-    joints: 
-      - motor_joint
+    joints:
+      - motor_joint  # THIS MUST MATCH THE HARDWARE INTERFACE NAME
+    command_interface: velocity
