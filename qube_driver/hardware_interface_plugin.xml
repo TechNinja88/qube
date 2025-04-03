@@ -1,0 +1,9 @@
+<library path="qube_driver">
+  <class name="qube_driver/ArduinoHardware"
+         type="qube_driver::ArduinoHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+		ROS2 Control System Driver for Quanser Qube.
+    </description>
+  </class>
+</library>
