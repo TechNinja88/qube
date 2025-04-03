@@ -28,7 +28,7 @@ def generate_launch_description():
             'robot_description': Command([
                 'xacro ', urdf_file,
                 ' baud_rate:=115200',
-                ' device:=/dev/ttyACM0',
+                ' device:=/dev/ttyACM1',
                 ' simulation:=', simulation
             ])
         }],
@@ -43,7 +43,7 @@ def generate_launch_description():
             {'robot_description': Command([
                 'xacro ', urdf_file,
                 ' baud_rate:=115200',
-                ' device:=/dev/ttyACM0',
+                ' device:=/dev/ttyACM1',
                 ' simulation:=', simulation
             ])},
             PathJoinSubstitution([pkg_qube_bringup, 'config', 'controllers.yaml'])
