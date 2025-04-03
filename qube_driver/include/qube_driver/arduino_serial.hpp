@@ -115,6 +115,7 @@ private:
                 // std::cout << "Read buffer: " << (int)read_buffer[0] << " " << (int)read_buffer[1] << " " << (int)read_buffer[2] << " " << (int)read_buffer[3] << ", ";
                 // std::cout << "Motor revolutions: " << motor_revolutions << ", ";
                 // std::cout << "Motor angle: " << motor_angle_int << "." << motor_angle_dec << std::endl;
+                serial_conn_.read(read_buffer, 2);
                 delete[] read_buffer;
                 
                 // The motor angle is in radians and is contnuous
