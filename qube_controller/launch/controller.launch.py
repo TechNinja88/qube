@@ -14,7 +14,7 @@ def generate_launch_description():
     
     declare_target_position = DeclareLaunchArgument(
         'target_position',
-        default_value='1.57',  # ~90 degrees
+        default_value='1.57',  # ~90 deg
         description='Target position for the motor joint in radians'
     )
     
