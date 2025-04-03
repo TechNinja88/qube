@@ -44,7 +44,7 @@ def generate_launch_description():
     
     declare_joint_name = DeclareLaunchArgument(
         'joint_name',
-        default_value='motor_joint',  # CHANGED to match your URDF
+        default_value='motor_joint',  
         description='Name of the joint to control'
     )
     

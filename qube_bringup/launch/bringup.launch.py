@@ -22,7 +22,7 @@ def generate_launch_description():
     
     declare_device = DeclareLaunchArgument(
         'device',
-        default_value='/dev/ttyACM0',
+        default_value='/dev/ttyACM1',
         description='Serial device for Qube'
     )
     

@@ -1,18 +1,14 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
-    
+    update_rate: 50  # Hz
+
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
-    
+      
     velocity_controller:
-      type: velocity_controllers/JointGroupVelocityController
-
-joint_state_broadcaster:
-  ros__parameters: {}
+      type: velocity_controllers/JointGroupVelocityController 
 
 velocity_controller:
   ros__parameters:
-    joints:
-      - motor_joint  # THIS MUST MATCH THE HARDWARE INTERFACE NAME
-    command_interface: velocity
+    joints: 
+      - motor_joint
