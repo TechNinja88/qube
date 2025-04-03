@@ -54,21 +54,7 @@ def generate_launch_description():
     pkg_qube_bringup = FindPackageShare('qube_bringup')
     
     # Launch arguments
-    baud_rate = LaunchConfiguration('baud_rate')
-    device = LaunchConfiguration('device')
     simulation = LaunchConfiguration('simulation')
-    
-    declare_baud_rate = DeclareLaunchArgument(
-        'baud_rate',
-        default_value='115200',
-        description='Baud rate for serial communication'
-    )
-    
-    declare_device = DeclareLaunchArgument(
-        'device',
-        default_value='/dev/ttyACM1',
-        description='Serial device for Qube'
-    )
     
     declare_simulation = DeclareLaunchArgument(
         'simulation',
@@ -87,8 +73,6 @@ def generate_launch_description():
         parameters=[{
             'robot_description': Command([
                 'xacro ', urdf_file,
-                ' baud_rate:=', baud_rate,
-                ' device:=', device,
                 ' simulation:=', simulation
             ])
         }],
@@ -104,15 +88,13 @@ def generate_launch_description():
         arguments=['-d', rviz_config_file],
     )
     
-    # Controller manager - ONLY ONE INSTANCE
+    # Controller manager
     controller_manager_node = Node(
         package='controller_manager',
         executable='ros2_control_node',
         parameters=[
             {'robot_description': Command([
                 'xacro ', urdf_file,
-                ' baud_rate:=', baud_rate,
-                ' device:=', device,
                 ' simulation:=', simulation
             ])},
             PathJoinSubstitution([pkg_qube_bringup, 'config', 'controllers.yaml'])
@@ -145,8 +127,6 @@ def generate_launch_description():
     )
     
     return LaunchDescription([
-        declare_baud_rate,
-        declare_device,
         declare_simulation,
         robot_state_publisher_node,
         controller_manager_node,
