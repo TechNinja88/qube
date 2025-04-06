@@ -14,5 +14,5 @@ joint_state_broadcaster:
 velocity_controller:
   ros__parameters:
     joints:
-      - motor_joint  # This matches the joint name in your URDF
+      - motor_joint  
     command_interface: velocity

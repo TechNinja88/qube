@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray, MultiArrayDimension, MultiArrayLayout
 import math
 
 class PIDController(Node):
@@ -11,123 +11,114 @@ class PIDController(Node):
         super().__init__('pid_controller')
         
         # Declare parameters
-        self.declare_parameter('kp', 2.0)
-        self.declare_parameter('ki', 0.2)
-        self.declare_parameter('kd', 0.1)
-        self.declare_parameter('target_position', 0.0)
-        self.declare_parameter('max_velocity', 6.0)  # maximum velocity command (rad/s)
+        params = [('kp', 0.4), ('ki', 0.01), ('kd', 0.0), ('target_position', 0.0), 
+                 ('max_velocity', 4.0), ('deadband', 0.8)]
+        for name, default in params:
+            self.declare_parameter(name, default)
+            setattr(self, name, self.get_parameter(name).value)
         
-        # Get parameters
-        self.kp = self.get_parameter('kp').value
-        self.ki = self.get_parameter('ki').value
-        self.kd = self.get_parameter('kd').value
-        self.target_position = self.get_parameter('target_position').value
-        self.max_velocity = self.get_parameter('max_velocity').value
-        
-        # Initialize PID variables
+        # Initialize controller state
         self.prev_error = 0.0
         self.integral = 0.0
         self.last_time = None
+        self.stable_count = 0
         
-        # Create subscription to joint states
+        # Create subscription and publisher
         self.joint_state_sub = self.create_subscription(
-            JointState,
-            '/joint_states',
-            self.joint_state_callback,
-            10)
-        
-        # Create publisher for velocity commands
+            JointState, '/joint_states', self.joint_state_callback, 10)
         self.velocity_pub = self.create_publisher(
-            Float64MultiArray,
-            '/velocity_controller/commands',
-            10)
-            
-        # Create parameter callback
-        self.add_on_set_parameters_callback(self.parameters_callback)
+            Float64MultiArray, '/velocity_controller/commands', 10)
         
-        # Log initialization success
-        self.get_logger().info('PID Controller initialized with kp={}, ki={}, kd={}'.format(
-            self.kp, self.ki, self.kd))
+        # Set parameter callback    
+        self.add_on_set_parameters_callback(self.parameters_callback)
+        self.get_logger().info(f'PID initialized: kp={self.kp}, ki={self.ki}, kd={self.kd}')
     
     def parameters_callback(self, params):
-        # Update parameters when they change
         for param in params:
-            if param.name == 'kp':
-                self.kp = param.value
-                self.get_logger().info(f"Updated kp to {self.kp}")
-            elif param.name == 'ki':
-                self.ki = param.value
-                self.get_logger().info(f"Updated ki to {self.ki}")
-            elif param.name == 'kd':
-                self.kd = param.value
-                self.get_logger().info(f"Updated kd to {self.kd}")
-            elif param.name == 'target_position':
-                self.target_position = param.value
-                self.get_logger().info(f"Updated target position to {self.target_position}")
-            elif param.name == 'max_velocity':
-                self.max_velocity = param.value
-                self.get_logger().info(f"Updated max velocity to {self.max_velocity}")
+            if param.name in ['kp', 'ki', 'kd', 'target_position', 'max_velocity', 'deadband']:
+                setattr(self, param.name, param.value)
+                self.get_logger().info(f"Updated {param.name} to {param.value}")
                 
-        # Reset integral for anti-windup when parameters change
-        self.integral = 0.0
-        
-        # Must return a SetParametersResult, not a boolean
+        self.integral = 0.0  # Reset integral on parameter change
         result = SetParametersResult()
         result.successful = True
-        result.reason = 'Parameters updated successfully'
         return result
     
     def joint_state_callback(self, msg):
-        """Process joint states and compute control signal"""
-        # Extract rotary joint position and velocity
-        if 'motor_joint' in msg.name:  # Changed from 'rotary_joint'
-            joint_idx = msg.name.index('motor_joint')  # Changed from 'rotary_joint'
-            position = msg.position[joint_idx]
-            velocity = msg.velocity[joint_idx] if len(msg.velocity) > joint_idx else 0.0
-        else:
-            self.get_logger().warn('motor_joint not found in joint states')
+        # Get joint position and velocity
+        if 'motor_joint' not in msg.name:
+            self.get_logger().warn('motor_joint not found')
             return
+            
+        idx = msg.name.index('motor_joint')
+        position = msg.position[idx]
+        velocity = msg.velocity[idx] if len(msg.velocity) > idx else 0.0
         
-        # Compute time delta
+        # Time delta calculation
         current_time = self.get_clock().now()
         if self.last_time is None:
             self.last_time = current_time
             return
-        dt = (current_time - self.last_time).nanoseconds / 1e9  # convert to seconds
+        dt = (current_time - self.last_time).nanoseconds / 1e9
+        if dt < 0.001: return
         self.last_time = current_time
         
-        # Compute error: normalize angle to [-pi, pi]
+        # Calculate error and PID terms
         error = self.normalize_angle(self.target_position - position)
-        
-        # PID control
         p_term = self.kp * error
         
-        # Accumulate integral with anti-windup
         self.integral += error * dt
-        if abs(self.integral) > 5.0:  # Anti-windup measure
-            self.integral = 5.0 if self.integral > 0 else -5.0
+        self.integral = max(min(self.integral, 2.0), -2.0)  # Anti-windup
         i_term = self.ki * self.integral
         
-        # Compute derivative term (using actual velocity)
-        d_term = self.kd * (-velocity)  # Negative because velocity is in the direction opposite to error reduction
+        error_derivative = (error - self.prev_error) / dt
+        d_term = self.kd * (error_derivative - velocity)
+        self.prev_error = error
         
-        # Compute total control signal
+        # Calculate control signal with deadband compensation
         control_signal = p_term + i_term + d_term
         
-        # Limit control signal to max_velocity
-        if abs(control_signal) > self.max_velocity:
-            control_signal = self.max_velocity if control_signal > 0 else -self.max_velocity
+        # Apply deadband compensation
+        if 0 < abs(control_signal) < self.deadband:
+            control_signal = self.deadband * (1 if control_signal > 0 else -1)
+            
+        # Apply boost for significant errors when not moving
+        if abs(error) > 0.2 and abs(velocity) < 0.05:
+            control_signal *= 1.5
+            
+        # Limit to maximum velocity
+        control_signal = max(min(control_signal, self.max_velocity), -self.max_velocity)
         
-        # Publish velocity command
-        velocity_cmd = Float64MultiArray()
-        velocity_cmd.data = [float(control_signal)]
-        self.velocity_pub.publish(velocity_cmd)
+        # Stability detection
+        if abs(error) < 0.05 and abs(velocity) < 0.1:
+            self.stable_count = min(self.stable_count + 1, 20)
+            if self.stable_count > 10:
+                control_signal = 0.0
+        else:
+            self.stable_count = 0
         
-        # Log
-        self.get_logger().info(f'Target: {self.target_position:.2f}, Position: {position:.2f}, Error: {error:.2f}, Command: {control_signal:.2f}')
+        # Publish command
+        self.publish_command(control_signal)
+        
+        # Log occasionally
+        if (current_time.nanoseconds // 500000000) % 2 == 0:
+            self.get_logger().info(f'Pos: {position:.2f}, Target: {self.target_position:.2f}, ' + 
+                                  f'Cmd: {control_signal:.2f}, P={p_term:.2f}, I={i_term:.2f}, D={d_term:.2f}')
+    
+    def publish_command(self, value):
+        msg = Float64MultiArray()
+        msg.layout = MultiArrayLayout()
+        
+        dim = MultiArrayDimension()
+        dim.label, dim.size, dim.stride = "velocity", 1, 1
+        
+        msg.layout.dim.append(dim)
+        msg.layout.data_offset = 0
+        msg.data = [float(value)]
+        
+        self.velocity_pub.publish(msg)
     
     def normalize_angle(self, angle):
-        """Normalize angle to [-pi, pi]"""
         while angle > math.pi:
             angle -= 2.0 * math.pi
         while angle < -math.pi:
@@ -136,17 +127,21 @@ class PIDController(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    pid_controller = PIDController()
+    controller = PIDController()
     
     try:
-        rclpy.spin(pid_controller)
+        rclpy.spin(controller)
     except KeyboardInterrupt:
         pass
     finally:
-        # Shutdown
-        pid_controller.get_logger().info('Shutting down PID Controller')
-        pid_controller.destroy_node()
+        # Send stop command before shutdown
+        controller.publish_command(0.0)
+        controller.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
+    
+#colcon build --symlink-install --packages-select qube_controller
+#source install/setup.bash
+#ros2 run qube_controller pid_controller
