@@ -11,8 +11,8 @@ class PIDController(Node):
         super().__init__('pid_controller')
         
         # Declare parameters
-        params = [('kp', 4.0), ('ki', 0.1), ('kd', 0.5), ('target_position', 0.0), 
-                 ('max_velocity', 6.0), ('deadband', 0.8)]
+        params = [('kp', 0.4), ('ki', 0.01), ('kd', 0.0), ('target_position', 0.0), 
+                 ('max_velocity', 4.0), ('deadband', 0.8)]
         for name, default in params:
             self.declare_parameter(name, default)
             setattr(self, name, self.get_parameter(name).value)
@@ -119,8 +119,10 @@ class PIDController(Node):
         self.velocity_pub.publish(msg)
     
     def normalize_angle(self, angle):
-        while angle > math.pi: angle -= 2.0 * math.pi
-        while angle < -math.pi: angle += 2.0 * math.pi
+        while angle > math.pi:
+            angle -= 2.0 * math.pi
+        while angle < -math.pi:
+            angle += 2.0 * math.pi
         return angle
 
 def main(args=None):
@@ -139,3 +141,7 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+    
+#colcon build --symlink-install --packages-select qube_controller
+#source install/setup.bash
+#ros2 run qube_controller pid_controller
