@@ -2,15 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>qube_bringup</name>
-<<<<<<< HEAD
-  <version>1.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="chrigrin@stud.ntnu.no">wahid</maintainer>
-=======
   <version>0.0.1</version>
   <description>Bringup package for Quanser Qube</description>
   <maintainer email="wahidas@stud.ntnu.no">wahid</maintainer>
->>>>>>> 330d8b6d6551b8fa5b585ec0b9beba5b58b05ad5
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_python</buildtool_depend>

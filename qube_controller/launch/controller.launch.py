@@ -10,11 +10,12 @@ def generate_launch_description():
     ki = LaunchConfiguration('ki')
     kd = LaunchConfiguration('kd')
     max_velocity = LaunchConfiguration('max_velocity')
-    joint_name = LaunchConfiguration('joint_name')
+    deadband = LaunchConfiguration('deadband')
     
+    # Declare launch arguments with default values
     declare_target_position = DeclareLaunchArgument(
         'target_position',
-        default_value='1.57',  # ~90 deg
+        default_value='1.57',
         description='Target position for the motor joint in radians'
     )
     
@@ -42,10 +43,10 @@ def generate_launch_description():
         description='Maximum velocity command'
     )
     
-    declare_joint_name = DeclareLaunchArgument(
-        'joint_name',
-        default_value='motor_joint',  
-        description='Name of the joint to control'
+    declare_deadband = DeclareLaunchArgument(
+        'deadband',
+        default_value='0.8',
+        description='Motor deadband compensation'
     )
     
     # PID Controller Node
@@ -59,7 +60,7 @@ def generate_launch_description():
             'ki': ki,
             'kd': kd,
             'max_velocity': max_velocity,
-            'joint_name': joint_name
+            'deadband': deadband
         }],
         output='screen'
     )
@@ -70,6 +71,6 @@ def generate_launch_description():
         declare_ki,
         declare_kd,
         declare_max_velocity,
-        declare_joint_name,
+        declare_deadband,
         pid_controller_node
     ])
