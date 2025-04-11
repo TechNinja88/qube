@@ -11,7 +11,7 @@ def generate_launch_description():
     kd = LaunchConfiguration('kd')
     max_velocity = LaunchConfiguration('max_velocity')
     joint_name = LaunchConfiguration('joint_name')
-    deadband = LaunchConfiguration('deadband')  # Added deadband parameter
+    deadband = LaunchConfiguration('deadband') 
     
     declare_target_position = DeclareLaunchArgument(
         'target_position',
