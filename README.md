@@ -56,7 +56,7 @@ For å starte PID-regulatoren og koble til Qube, bruk følgende kommando:
 
 ```bash
 ros2 launch qube_bringup bringup.launch.py simulation:=false
-ros2 launch qube_controller qube_test.launch.py
+ros2 launch qube_controller controller.launch.py
 ```
 
 Dette vil starte nødvendige noder for å kontrollere Qube og visualisere tilstanden dens.
