@@ -6,26 +6,26 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    # Declare launch arguments
+    # Package paths
     pkg_qube_bringup = FindPackageShare('qube_bringup')
-    
+
     # Launch arguments
     simulation = LaunchConfiguration('simulation')
     
+    # Declare arguments
     declare_simulation = DeclareLaunchArgument(
         'simulation',
         default_value='false',
         description='Use simulation instead of real hardware'
     )
-    
+
     # URDF file
     urdf_file = PathJoinSubstitution([pkg_qube_bringup, 'urdf', 'controlled_qube.urdf.xacro'])
-    
+
     # Robot state publisher
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        name='robot_state_publisher',
         parameters=[{
             'robot_description': Command([
                 'xacro ', urdf_file,
@@ -34,17 +34,16 @@ def generate_launch_description():
         }],
         output='screen',
     )
-    
-    # RViz
+
+    # RViz for visualization
     rviz_config_file = PathJoinSubstitution([pkg_qube_bringup, 'rviz', 'qube.rviz'])
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
         arguments=['-d', rviz_config_file],
     )
-    
-    # Controller manager
+
+    # Controller manager - runs the hardware interface defined in the URDF
     controller_manager_node = Node(
         package='controller_manager',
         executable='ros2_control_node',
@@ -57,23 +56,23 @@ def generate_launch_description():
         ],
         output='screen',
     )
-    
-    # Joint state broadcaster spawner
+
+    # Joint state broadcaster spawner - publishes joint states for visualization
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster'],
+        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
         output='screen',
     )
-    
-    # Velocity controller spawner - with dependency
+
+    # Velocity controller spawner - the controller that sends commands to the hardware
     velocity_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['velocity_controller'],
+        arguments=['velocity_controller', '--controller-manager', '/controller_manager'],
         output='screen',
     )
-    
+
     # Make sure controllers start in sequence
     controller_sequence = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -81,12 +80,17 @@ def generate_launch_description():
             on_exit=[velocity_controller_spawner],
         )
     )
-    
+
     return LaunchDescription([
+        # Parameters
         declare_simulation,
+        
+        # Core nodes
         robot_state_publisher_node,
         controller_manager_node,
         joint_state_broadcaster_spawner,
         controller_sequence,
+        
+        # Visualization
         rviz_node,
     ])
