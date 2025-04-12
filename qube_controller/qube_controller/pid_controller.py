@@ -1,3 +1,4 @@
+#the controller works properly in simulation but not with quanser qube
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import SetParametersResult
@@ -14,15 +15,15 @@ class PIDController(Node):
         self.declare_parameter('ki', 0.05)         # Small but effective for steady-state error
         self.declare_parameter('kd', 0.08)         # Added to dampen oscillations
         self.declare_parameter('target_position', 1.57)  # Match launch file default
-        self.declare_parameter('max_velocity', 3.0)      # ~30% of max motor speed for safety
+        self.declare_parameter('max_velocity', 6.0)      # max motor speed for safety
         self.declare_parameter('deadband', 0.4)          # Lower deadband for precision
         self.declare_parameter('joint_name', 'motor_joint')
-        
+    
         # System constants based on Quanser specs
         self.COUNTS_PER_REV = 2048
         self.RAD_PER_COUNT = 2 * math.pi / self.COUNTS_PER_REV
         self.MAX_MOTOR_RPM = 5400
-        self.PENDULUM_LENGTH = 0.095  # meters
+        self.PENDULUM_LENGTH = 0.095 
         
         # Get parameters from parameter server
         self.kp = self.get_parameter('kp').value
@@ -154,7 +155,7 @@ class PIDController(Node):
                 f'Cmd: {control_signal:.3f} (P={p_term:.2f}, I={i_term:.2f}, D={d_term:.2f})'
             )
     
-    def publish_command(self, value):
+    def publish_command(self, value):#got help from teacher based on info from this website(https://docs.ros.org/en/melodic/api/std_msgs/html/msg/MultiArrayLayout.html)
         msg = Float64MultiArray()
         msg.layout = MultiArrayLayout()
         
