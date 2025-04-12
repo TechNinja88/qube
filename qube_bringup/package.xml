@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
-  <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-  <package format="3">
-    <name>qube_bringup</name>
-    <version>0.0.1</version>
-    <description>Bringup package for Quanser Qube</description>
-    <maintainer email="wahidas@stud.ntnu.no">wahid</maintainer>
-    <license>MIT</license>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>qube_bringup</name>
+  <version>0.0.1</version>
+  <description>Bringup package for Quanser Qube</description>
+  <maintainer email="wahidas@stud.ntnu.no">wahid</maintainer>
+  <license>TODO: License declaration</license>
 
-    <buildtool_depend>ament_python</buildtool_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
 
-    <depend>launch</depend>
-    <depend>launch_ros</depend>
-    <depend>qube_description</depend>
-    <depend>qube_driver</depend>
-    <depend>controller_manager</depend>
-    <depend>ros2_controllers</depend>
-    <exec_depend>robot_state_publisher</exec_depend>
-    <exec_depend>rviz2</exec_depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>qube_description</depend>
+  <depend>qube_driver</depend>
+  <depend>controller_manager</depend>
+  <depend>ros2_controllers</depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
-    <test_depend>ament_copyright</test_depend>
-    <test_depend>ament_flake8</test_depend>
-    <test_depend>ament_pep257</test_depend>
-    <test_depend>python3-pytest</test_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
-    <export>
-      <build_type>ament_python</build_type>
-    </export>
-  </package>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

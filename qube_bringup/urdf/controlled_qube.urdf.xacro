@@ -6,15 +6,15 @@
   <xacro:arg name="simulation" default="false"/>
     <!-- Include the Qube macro -->
     <xacro:include filename="$(find qube_description)/urdf/qube.urdf.xacro" />
-
+    
     <!-- Include the ros2_control macro -->
     <xacro:include filename="$(find qube_driver)/ros2_control/qube_driver.ros2_control.xacro" />
-
+    
     <!-- Add ros2_control to the robot -->
-    <xacro:qube_driver_ros2_control
-        name="qube_driver"
-        prefix=""
-        baud_rate="$(arg baud_rate)"
+    <xacro:qube_driver_ros2_control 
+        name="qube_driver" 
+        prefix="" 
+        baud_rate="$(arg baud_rate)" 
         device="$(arg device)"
         simulation="$(arg simulation)" />
 </robot>

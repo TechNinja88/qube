@@ -83,7 +83,6 @@
       <child link="${prefix}stator_link"/>
       <origin xyz="0 0 ${stator_size/2}" rpy="0 0 0"/>
     </joint>
-
     <!-- Revolute joint connecting stator_link to rotor_link -->
     <joint name="${prefix}motor_joint" type="continuous">
       <parent link="${prefix}stator_link"/>
@@ -100,3 +99,7 @@
     </joint>
   </xacro:macro>
 </robot>
+
+
+
+

@@ -8,11 +8,7 @@ controller_manager:
     velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
 
-joint_state_broadcaster:
-  ros__parameters: {}
-
 velocity_controller:
   ros__parameters:
     joints:
-      - motor_joint  
-    command_interface: velocity
+      - motor_joint
