@@ -1,96 +1,69 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
-from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
-
+import os
+from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
-    # Package paths
-    pkg_qube_bringup = FindPackageShare('qube_bringup')
-
+    # Get directories
+    qube_bringup_pkg_share = get_package_share_directory('qube_bringup')# Path to the bringup package
+    qube_driver_pkg_share = get_package_share_directory('qube_driver')# Path to the driver package
+    # Launch configuration variables
+    simulation = LaunchConfiguration('simulation')# Simulation mode
+    use_sim_time = LaunchConfiguration('use_sim_time')# Use simulation time
     # Launch arguments
-    simulation = LaunchConfiguration('simulation')
-    
-    # Declare arguments
-    declare_simulation = DeclareLaunchArgument(
-        'simulation',
+    declare_simulation_cmd = DeclareLaunchArgument(
+        name='simulation',
         default_value='false',
-        description='Use simulation instead of real hardware'
+        description='Use simulation if true'
     )
-
-    # URDF file
-    urdf_file = PathJoinSubstitution([pkg_qube_bringup, 'urdf', 'controlled_qube.urdf.xacro'])
-
-    # Robot state publisher
+    # Launch arguments for simulation time
+    declare_use_sim_time_cmd = DeclareLaunchArgument(
+        name='use_sim_time',
+        default_value='false',
+        description='Use simulation clock if true'
+    )
+    # Build the URDF model
+    urdf_model_path = os.path.join(qube_bringup_pkg_share, 'urdf', 'controlled_qube.urdf.xacro') # Path to the URDF model
+    robot_description_content = Command([
+        'xacro ', urdf_model_path,
+        ' simulation:=', simulation
+    ])
+    # robot_state_publisher node
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         parameters=[{
-            'robot_description': Command([
-                'xacro ', urdf_file,
-                ' simulation:=', simulation
-            ])
-        }],
-        output='screen',
+            'robot_description': robot_description_content,
+            'use_sim_time': use_sim_time
+        }]
     )
-
-    # RViz for visualization
-    rviz_config_file = PathJoinSubstitution([pkg_qube_bringup, 'rviz', 'qube.rviz'])
+    # Launch qube_driver
+    qube_driver_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(qube_driver_pkg_share, 'launch', 'qube_driver.launch.py') # Path to the driver launch file
+        ),
+        launch_arguments={
+            'simulation': simulation    # Simulation mode
+        }.items()
+    )
+    # RViz configuration
+    rviz_config_file = os.path.join(qube_bringup_pkg_share, 'rviz', 'qube.rviz') # Path to the RViz configuration file
+    # Create RViz node
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
-        arguments=['-d', rviz_config_file],
-    )
-
-    # Controller manager - runs the hardware interface defined in the URDF
-    controller_manager_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[
-            {'robot_description': Command([
-                'xacro ', urdf_file,
-                ' simulation:=', simulation
-            ])},
-            PathJoinSubstitution([pkg_qube_bringup, 'config', 'controllers.yaml'])
-        ],
+        name='rviz2',
         output='screen',
+        arguments=['-d', rviz_config_file] if os.path.exists(rviz_config_file) else [] # Check if the RViz config file exists
     )
-
-    # Joint state broadcaster spawner - publishes joint states for visualization
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
-        output='screen',
-    )
-
-    # Velocity controller spawner - the controller that sends commands to the hardware
-    velocity_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['velocity_controller', '--controller-manager', '/controller_manager'],
-        output='screen',
-    )
-
-    # Make sure controllers start in sequence
-    controller_sequence = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[velocity_controller_spawner],
-        )
-    )
-
+    # Launch description
     return LaunchDescription([
-        # Parameters
-        declare_simulation,
-        
-        # Core nodes
+        declare_simulation_cmd,
+        declare_use_sim_time_cmd,
         robot_state_publisher_node,
-        controller_manager_node,
-        joint_state_broadcaster_spawner,
-        controller_sequence,
-        
-        # Visualization
-        rviz_node,
+        qube_driver_launch,
+        rviz_node
     ])
+

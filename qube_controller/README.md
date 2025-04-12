@@ -1,7 +1,8 @@
 # Qube Controller Package (Styringspakke for Qube)
 
-`qube_controller` pakken er brukes for styring av Quanser Qube-motoren ved bruk av en PID-regulator. Den muliggjør presis posisjonskontroll og støtter både simulerings og virkelighet (hardware mode).
+Pakken `qube_controller` brukes til styring av Quanser Qube-motoren ved hjelp av en PID-regulator. Den muliggjør presis posisjonskontroll og støtter både simulering og virkelig maskinvare (hardware mode).
 
+Programmet inkluderer deadband-kompensasjon for å motvirke statisk friksjon i motoren, hastighetsfiltrering for å redusere støy i den deriverte reguleringen, samt anti-windup-beskyttelse som forhindrer at integralleddet akkumulerer for mye.
 ## Funksjoner
 - **PID-regulator**: Implementerer en konfigurerbar PID-regulator for motorposisjon
 - **Oppstartsintegrasjon**: Enkel konfigurasjon og oppstart via ROS 2-oppstartsfiler
@@ -57,8 +58,14 @@ ros2 param set /pid_controller ki 0.5
 ros2 param set /pid_controller kd 0.005
 ros2 param set /pid_controller target_position 3.16
 ```
-
-
+### Kjekke kommunikasjon 
+For å sjekke kommunikasjonen mellom noder og emner, kan du bruke følgende kommandoer:
+```bash
+ros2 topic list
+ros2 topic echo /joint_states
+ros2 topic echo /velocity_controller/commands
+ros2 topic echo /pid_controller/status 
+```
 ### Tilleggsopplysninger
 - Pakken er optimalisert for ROS 2 jazzy/rolling
 - Krever at `qube_description`, `qube_driver` og `qube_bringup`-pakkene er tilgjengelig i samme workspace
