@@ -66,4 +66,3 @@ def generate_launch_description():
         qube_driver_launch,
         rviz_node
     ])
-
