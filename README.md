@@ -38,8 +38,7 @@ source install/setup.bash
 ### Koble til Qube
 
 1. Koble Quanser Qube til datamaskinen via USB.
-2. Finn riktig USB-port. Typisk vil det være noe som `/dev/ttyACM1`.
-3. Sørg for at korrekt firmware er lastet opp til Qube ved hjelp av Arduino IDE.
+2. Finn riktig USB-port`ls /dev/tty*`. Typisk vil det være noe som `/dev/ttyACM1` og aktivere den `sudo chmod 666 /dev/ttyACMX`.
 
 ### Kjør RViz
 For å visualisere Qube i RViz, kjør følgende kommando:
