@@ -79,5 +79,6 @@ ros2 param set /pid_controller kd 0.1
 - `max_velocity`: Maksimal hastighetskommando (rad/s)
 - `max_effort`: Maksimal kraftkommando (Nm)
 ## gruppe deltakere
-Christian gimse 
-Wahid Sediqi
+Christian gimse
+
+Wahid A. Sediqi
