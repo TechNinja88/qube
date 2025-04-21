@@ -7,7 +7,7 @@ from launch.actions import DeclareLaunchArgument
 
 def generate_launch_description():
     # Get the package directory
-    pkg_share = get_package_share_directory('qube_description')
+    pkg_share = get_package_share_directory('qube_description') # Corrected package name
     
     # Path to the URDF file
     urdf_path = os.path.join(pkg_share, 'urdf', 'qube.urdf.xacro')
@@ -55,8 +55,8 @@ def generate_launch_description():
     
     # Return the launch description
     return LaunchDescription([
-        declare_use_sim_time_arg,
-        robot_state_publisher,
-        joint_state_publisher_gui, 
-        rviz,
+        declare_use_sim_time_arg,# Declare the use_sim_time argument
+        robot_state_publisher,# Robot state publisher
+        joint_state_publisher_gui, # Joint state publisher GUI
+        rviz, # RViz node
     ])
